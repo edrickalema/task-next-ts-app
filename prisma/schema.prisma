@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+}
+
+// User Account 
+model User {
+  id String @id @unique 
+  name String 
+  email String @unique
+  picture String
+  colorTheme String
+  projects Project[]
+  members Member[]
+  task Task[]
+}
+
+// User Project
+model Project {
+  id String @id @unique 
+  title String 
+  author User @relation(fields: [userId], references: [id])
+  userId String
+  team Member[]
+  isArchived Boolean @default(false)
+  color String
+}
+
+// Task Project
+model Task {
+  id String @id @unique 
+  title String
+  description String
+  due_date DateTime
+  comments Comment[]
+  team Member[]
+  checkList CheckList[]
+  userId String
+  task_User User @relation(fields: [userId], references: [id])
+}
+
+model Comment {
+  id String @id @unique
+  comment String
+  taskId String
+  task Task @relation(fields: [taskId], references: [id])
+  authorId String
+  author Member @relation(fields: [authorId], references: [id])
+}
+
+model Member {
+  id String @id @unique 
+  name String
+  email String
+  password String
+  role String @default("user")
+  comments Comment[]
+  userId String
+  projectId String
+  taskId String
+  account User @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+  task Task @relation(fields: [taskId], references: [id])
+}
+
+model CheckList {
+  id String @id @unique 
+  title String
+  taskId String
+  task Task @relation(fields: [taskId], references: [id])
+}
